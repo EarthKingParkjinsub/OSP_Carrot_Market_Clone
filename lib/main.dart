@@ -19,6 +19,7 @@ import 'package:flutter_sandbox/firebase_options.dart';
 import 'package:flutter_sandbox/config/api_keys.dart';
 import 'package:flutter_sandbox/providers/kakao_login_provider.dart';
 import 'package:flutter_sandbox/providers/email_auth_provider.dart';
+import 'package:flutter_sandbox/providers/ad_provider.dart';
 import 'package:flutter_sandbox/pages/home_page.dart';
 
 /// 앱의 메인 진입점
@@ -68,6 +69,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => KakaoLoginProvider()),
         ChangeNotifierProvider(create: (context) => EmailAuthProvider()),
+        ChangeNotifierProvider(create: (context) => AdProvider()),
       ],
       child: const MyApp(),
     ),
