@@ -22,6 +22,8 @@ import 'package:flutter_sandbox/providers/kakao_login_provider.dart';
 import 'package:flutter_sandbox/providers/email_auth_provider.dart' as app_auth;
 import 'package:flutter_sandbox/models/product.dart';
 import 'package:flutter_sandbox/pages/product_detail_page.dart';
+import 'package:flutter_sandbox/services/admin_service.dart';
+import 'package:flutter_sandbox/pages/admin_page.dart';
 
 /// 사용자 프로필 페이지를 나타내는 위젯
 class ProfilePage extends StatefulWidget {
@@ -38,6 +40,12 @@ class _ProfilePageState extends State<ProfilePage>
 
   /// 내가 등록한 상품 목록 (임시 데이터)
   List<Product> _myProducts = [];
+
+  /// 관리자 페이지 접근을 위한 설정 아이콘 탭 횟수
+  int _settingsTapCount = 0;
+
+  /// 관리자 서비스
+  final AdminService _adminService = AdminService();
 
   @override
   void initState() {
@@ -146,8 +154,38 @@ class _ProfilePageState extends State<ProfilePage>
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.black),
-            onPressed: () {
-              // 설정 기능 (향후 구현)
+            onPressed: () async {
+              _settingsTapCount++;
+              if (_settingsTapCount >= 10) {
+                _settingsTapCount = 0;
+                final isAdmin = await _adminService.isAdmin();
+                if (isAdmin && mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminPage(),
+                    ),
+                  );
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('관리자 권한이 없습니다'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                }
+              } else {
+                // 3초 후 탭 횟수 리셋
+                Future.delayed(const Duration(seconds: 3), () {
+                  if (mounted) {
+                    setState(() {
+                      _settingsTapCount = 0;
+                    });
+                  }
+                });
+              }
             },
           ),
         ],

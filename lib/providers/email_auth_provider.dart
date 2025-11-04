@@ -13,6 +13,7 @@
 /// @version 1.0.0
 /// @since 2024-01-01
 
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -65,10 +66,23 @@ class EmailAuthProvider with ChangeNotifier {
       await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw TimeoutException('로그인 요청 시간 초과');
+        },
       );
       return null;
+    } on TimeoutException {
+      final errorMsg = '네트워크 연결이 불안정합니다. 인터넷 연결을 확인하고 다시 시도해주세요.';
+      setState(errorMessage: errorMsg);
+      return errorMsg;
     } on FirebaseAuthException catch (e) {
       final errorMsg = _getErrorMessage(e.code);
+      setState(errorMessage: errorMsg);
+      return errorMsg;
+    } catch (e) {
+      final errorMsg = '로그인 중 오류가 발생했습니다: ${e.toString()}';
       setState(errorMessage: errorMsg);
       return errorMsg;
     } finally {
@@ -90,10 +104,23 @@ class EmailAuthProvider with ChangeNotifier {
       await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
         password: password,
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw TimeoutException('회원가입 요청 시간 초과');
+        },
       );
       return null;
+    } on TimeoutException {
+      final errorMsg = '네트워크 연결이 불안정합니다. 인터넷 연결을 확인하고 다시 시도해주세요.';
+      setState(errorMessage: errorMsg);
+      return errorMsg;
     } on FirebaseAuthException catch (e) {
       final errorMsg = _getErrorMessage(e.code);
+      setState(errorMessage: errorMsg);
+      return errorMsg;
+    } catch (e) {
+      final errorMsg = '회원가입 중 오류가 발생했습니다: ${e.toString()}';
       setState(errorMessage: errorMsg);
       return errorMsg;
     } finally {

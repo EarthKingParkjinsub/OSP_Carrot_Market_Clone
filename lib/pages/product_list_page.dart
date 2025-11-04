@@ -16,8 +16,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_sandbox/models/product.dart';
+import 'package:flutter_sandbox/models/ad.dart';
+import 'package:flutter_sandbox/providers/ad_provider.dart';
 import 'package:flutter_sandbox/pages/product_detail_page.dart';
+import 'package:flutter_sandbox/widgets/ad_card.dart';
 
 /// 상품 목록을 표시하는 페이지
 class ProductListPage extends StatefulWidget {
@@ -243,14 +247,56 @@ class _ProductListPageState extends State<ProductListPage> {
     );
   }
 
+  /// 상품 목록과 광고를 병합한 리스트를 반환하는 메서드
+  List<dynamic> _getMergedList(List<Product> products, List<Ad> ads) {
+    final mergedList = <dynamic>[];
+    
+    // 상품 목록을 복사
+    for (var product in products) {
+      mergedList.add(product);
+    }
+    
+    // 활성화된 광고를 position에 맞게 삽입
+    for (var ad in ads) {
+      if (ad.isActive && ad.position >= 0) {
+        // position이 상품 목록 범위 내인 경우에만 삽입
+        if (ad.position < mergedList.length) {
+          mergedList.insert(ad.position, ad);
+        } else {
+          // position이 범위를 벗어나면 끝에 추가
+          mergedList.add(ad);
+        }
+      }
+    }
+    
+    return mergedList;
+  }
+
   /// 상품 목록을 생성하는 위젯
   Widget _buildProductList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _filteredProducts.length,
-      itemBuilder: (context, index) {
-        final product = _filteredProducts[index];
-        return _buildProductItem(product);
+    return Consumer<AdProvider>(
+      builder: (context, adProvider, child) {
+        final mergedList = _getMergedList(
+          _filteredProducts,
+          adProvider.activeAds,
+        );
+        
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: mergedList.length,
+          itemBuilder: (context, index) {
+            final item = mergedList[index];
+            
+            // 타입에 따라 Product 또는 Ad 렌더링
+            if (item is Product) {
+              return _buildProductItem(item);
+            } else if (item is Ad) {
+              return AdCard(ad: item);
+            } else {
+              return const SizedBox.shrink();
+            }
+          },
+        );
       },
     );
   }
