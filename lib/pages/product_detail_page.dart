@@ -633,7 +633,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
       'unreadCount': {
         buyerId: 0,
-        sellerId: 1,
+        sellerId: 0,
       },
 
       'createdAt': FieldValue.serverTimestamp(),
