@@ -216,10 +216,9 @@ class _ProductListPageState extends State<ProductListPage> {
     for (var i = 0; i < products.length; i++) {
       mergedList.add(products[i]);
 
-      final isLastProduct = (i + 1) >= products.length;
       final shouldInsertAd = (i + 1) % 5 == 0 && adIndex < activeAds.length;
 
-      if (shouldInsertAd && !isLastProduct) {
+      if (shouldInsertAd) {
         mergedList.add(activeAds[adIndex]);
         adIndex++;
       }
